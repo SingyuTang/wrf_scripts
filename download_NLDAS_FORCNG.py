@@ -1,18 +1,38 @@
 """
-此脚本用于下载WRF-Hydro所需的FORCING数据（NLDAS数据），
-下载单个NLDAS文件的URL如：https://hydro1.gesdisc.eosdis.nasa.gov/data/NLDAS/NLDAS_FORA0125_H.002/2024/032/NLDAS_FORA0125_H.A20240201.0100.002.grb
+introduce:
+    此 脚本用于下载WRF-Hydro所需的FORCING数据（NLDAS数据），
+    单个NLDAS数据来源如：
+            https://hydro1.gesdisc.eosdis.nasa.gov/data/NLDAS/NLDAS_FORA0125_H.002/2024/032/NLDAS_FORA0125_H.A20240201.0100.002.grb
+    所有用户都必须在 Earthdata 登录系统上注册才能访问 GES DISC 数据，可通过下面链接注册
+        [earthdata login](https://urs.earthdata.nasa.gov/oauth/authorize?response_type=code&redirect_uri=http%3A%2F%2Fdisc.gsfc.nasa.gov%2Flogin%2Fcallback&client_id=C_kKX7TXHiCUqzt352ZwTQ)
+    其它关于Earthdata数据访问问题及流程可查看下面链接
+        https://disc.gsfc.nasa.gov/information/documents?title=Data%20Access
+parameters:
+    start_date: datetime
+        开始时间
+    end_date: datetime
+        结束时间
+    username: str
+        NASA Earthdata账号登陆用户名
+    password: str
+        NASA Earthdata账号登陆用户名
+    dld_dir: str
+        下载的NLDAS数据保存的路径
+usage:
+    main()
 """
 
 import requests
 from pathlib import Path, PosixPath
 from datetime import datetime, timedelta
-import os
+import os, shutil
 import tqdm
 
 start_date = datetime(2024, 1, 3, 0, 0, 0)
-end_date = datetime(2024, 3, 31, 23, 0, 0)
-username="ManaSakura"
-password="Txy199906301152"
+end_date = datetime(2024, 1, 3, 23, 0, 0)
+username = "ManaSakura"
+password = "Txy199906301152"
+dld_dir = r'./Results/NLDAS_dld'
 
 class SessionWithHeaderRedirection(requests.Session):
 
@@ -105,4 +125,10 @@ def ymd_to_doy(year, month, day):
     date_doy = date.timetuple().tm_yday
     return str(date_doy).zfill(3)
 
-downloader(start_date, end_date, username, password)
+def main():
+    if os.path.exists(dld_dir):
+        shutil.rmtree(dld_dir)
+    os.mkdir(dld_dir)
+    downloader(start_date, end_date, username, password, dld_dir)
+if __name__ == "__main__":
+    main()
